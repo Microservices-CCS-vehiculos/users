@@ -13,8 +13,10 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     this.logger.log('Connected DB');
   }
   create(createUserDto: CreateUserDto) {
-    const { name, username, email, password, role_id } = createUserDto;
-    return `This action adds a new user named ${name} with username: ${username}, email: ${email}, password: ${password}, role_id ${role_id}`;
+    
+    return this.user.create({
+      data: createUserDto
+    }); 
   }
 
   findAll() {
