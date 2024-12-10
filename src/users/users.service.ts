@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaClient } from '@prisma/client';
+import { PaginationDto } from 'src/common';
 
 @Injectable()
 export class UsersService extends PrismaClient implements OnModuleInit {
@@ -19,8 +20,21 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     }); 
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+    const totalPage = await this.user.count();
+
+    return {
+      data: await this.user.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      meta: {
+        page: page,
+        limit: limit,
+        totalPage: Math.ceil(totalPage / limit)
+      }
+    }
   }
 
   findOne(id: number) {

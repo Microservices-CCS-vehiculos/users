@@ -3,8 +3,6 @@ import { IsEmail, IsNumber, IsString, IsUUID } from "class-validator";
 
 export class CreateUserDto {
     @IsString()
-    public name: string;
-    @IsString()
     public username: string;
     @IsEmail()
     public email: string;
