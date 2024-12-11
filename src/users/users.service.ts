@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, OnModuleInit,} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaClient } from '@prisma/client';
@@ -37,8 +37,21 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+     const userById =  await this.user.findUnique({
+      where: {
+        user_id: id
+      }
+    });
+
+    if (!userById) {
+      throw new NotFoundException(`User with id:${id} not found`);
+    }
+
+    return userById;
+
+
+
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
