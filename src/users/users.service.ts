@@ -22,12 +22,15 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;
-    const totalPage = await this.user.count();
+    const totalPage = await this.user.count({where: {availebel: true}});
 
     return {
       data: await this.user.findMany({
         skip: (page - 1) * limit,
         take: limit,
+        where: {
+          availebel: true
+        }
       }),
       meta: {
         page: page,
@@ -40,7 +43,8 @@ export class UsersService extends PrismaClient implements OnModuleInit {
   async findOne(id: string) {
      const userById =  await this.user.findUnique({
       where: {
-        user_id: id
+        user_id: id,
+        availebel: true
       }
     });
 
@@ -49,9 +53,6 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     }
 
     return userById;
-
-
-
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
@@ -64,7 +65,23 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    try {
+      const updatedUser = await this.user.update({
+        where: {
+          user_id: id,
+          availebel: true, // Solo actualiza si el usuario está disponible (true)
+        },
+        data: {
+          availebel: false, 
+        },
+      });
+  
+      return updatedUser;
+    } catch (error) {
+      if (error.code === 'P2025') { // Error original de prisma
+        throw new NotFoundException(`El usuario con id:${id} no existe o no está disponible`);
+      }
+    }
   }
 }
